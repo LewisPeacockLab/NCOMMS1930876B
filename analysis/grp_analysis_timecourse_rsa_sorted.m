@@ -6,7 +6,7 @@ output_dir      = dirs.rsa.group.parse;
 xsub_groups     = args.filtered_subs;
 
 %% ============= SETUP PARAMETERS
-xph = 2;
+xph             = args.xphase;
 xindex          = args.index{xph};% param index from study
 xparam          = xindex.param;
 condition_names = {'Maintain','RepCat','RepSubcat','Suppress','Clear'};
@@ -38,8 +38,6 @@ xonset_color = args.onset_color;
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%============= STUDY TIMECOURSE: PER TARGET
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-xph = 2;
-
 clear tc tc_diff xevidence
 
 xtarg     = 1;
@@ -102,7 +100,6 @@ for xblk = 1:n_stat_blks
     
     tc.anova.blk{xblk}.pvalue = xanova_out.pValue(1);
     tc.anova.blk{xblk}.stats  = xtx_out;
-    
 end
 
 %% ============= TIMECOURSE DIFFERENCE

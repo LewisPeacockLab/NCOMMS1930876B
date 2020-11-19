@@ -52,15 +52,9 @@ for it = 1:n_condition
     
     xregs.timecourse(xunit) = xcond;
     
-    if args.reset_6tr{xph}
-        xunit = find(getDATA(xindex.matrix', xindex.header, ...
-            {'condition','presentation','spike'}, ...
-            {xcond, 2, 0}));
-    else
-        xunit = find(getDATA(xindex.matrix', xindex.header, ...
-            {'condition','manipulation','spike'}, ...
-            {xcond, 1, 0}));
-    end
+    xunit = find(getDATA(xindex.matrix', xindex.header, ...
+        {'condition','manipulation','spike'}, ...
+        {xcond, 1, 0}));
     
     xregs.operation_sh(xunit + args.shift_TRs) = it;
 end
@@ -69,9 +63,7 @@ end
 n_validation = numel(ph.results.iterations);
 n_runs       = xparam.n_runs;
 n_trials     = xparam.n_trials;
-
 n_trs        = args.tc_tr;
-dur_sync     = args.dur_sync;
 
 %*************** output basename
 base_name    = args.analysis_basename;
@@ -123,12 +115,6 @@ if check_perf% check mvpa performance
     
     %% ============= WRITE TABLE TO CSV FILES FOR PYTHON
     clear xaccuracy xevidence targ_accuracy
-    
-    %*************** rest
-    if strcmp(args.rest, 'rest')
-        condition_name{n_target-1} = 'perception';
-        condition_name{n_target}   = 'rest';
-    end
     
     %*************** create tables
     for xcond = 1:n_target
@@ -257,16 +243,6 @@ if check_perf% check mvpa performance
                                     decode.timecourse.operation{it}.decoded_operation{xoper}.evidence{zz}.tr{xtr} = ...
                                         horzcat(decode.timecourse.operation{it}.decoded_operation{xoper}.evidence{zz}.tr{xtr}, ...
                                         out_acts{zz}(xoper, xunit_tc(xtr)));
-                                    
-                                    %*************** sync trs
-                                    if xtr > length(xunit)
-                                        it_tr = xtr - length(xunit);
-                                        if it_tr <= dur_sync
-                                            decode.timecourse.sync.operation{it}.decoded_operation{xoper}.evidence{zz}.tr{it_tr} = ...
-                                                horzcat(decode.timecourse.sync.operation{it}.decoded_operation{xoper}.evidence{zz}.tr{it_tr}, ...
-                                                out_acts{zz}(xoper, xunit_tc(xtr)));
-                                        end
-                                    end
                                 end
                             end
                         end

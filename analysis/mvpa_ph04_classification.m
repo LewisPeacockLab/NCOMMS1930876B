@@ -43,15 +43,8 @@ function[args, subj, results] = mvpa_ph04_classification(args, subj, nm)
     
     %*************** classification iteration
     for i=1:nIterations
-        if strcmp(args.regress_type, 'shift')
-            nm_regs = nm.conds_sh{xph};
-        elseif strcmp(args.regress_type, 'beta')
-            nm_regs = nm.conds{xph};
-        end
-        
         if args.cross_valid
             mask_name = sprintf('%s_patterns_z_thresh0.05', args.phase_name{xph});
-%             subj.masks{2}.group_name;
         else
             mask_name = subj.masks{3}.name;
         end
@@ -60,13 +53,13 @@ function[args, subj, results] = mvpa_ph04_classification(args, subj, nm)
             if args.cross_decoding
                 fprintf('\n... classification: cross-validation (leave 1-out): testing on all timepoints\n');
                 
-                [subj, results] = cross_validation(subj, nm.pats_z{xph}, nm_regs,...
+                [subj, results] = cross_validation(subj, nm.pats_z{xph}, nm.conds_sh{xph},...
                     nm.decoding_runs, mask_name, class_args, cv_args);
                 
             else
                 fprintf('\n... classification: cross-validation (leave 1-out)\n');
                 
-                [subj, results] = cross_validation(subj, nm.pats_z{xph}, nm_regs,...
+                [subj, results] = cross_validation(subj, nm.pats_z{xph}, nm.conds_sh{xph},...
                     nm.run_xvalid{xph}, mask_name, class_args, cv_args);
             end
         else% decoding 

@@ -29,27 +29,13 @@ regs.selectors = regs.matrix(findCol(regs.header, {'run'}), :);
 %***************** defining regressor names
 regress_name = [];
 if strcmp(args.level, 'category')
-    regress_name = category_name(args.selected_category);
-    rest_class   = length(args.selected_category) + 1;
-    
+    regress_name = category_name;    
 elseif strcmp(args.level, 'subcategory')
-    if ~(args.subclass_selecting)
-        for xcate = args.selected_category%n_category
-            regress_name = [regress_name subcategory_name{xcate}];
-        end %#ok<*AGROW>
-    else
-        for i = 1:length(args.selected_category)
-            xcate = args.selected_category(i);%n_category
-            for j = 1:length(args.selected_subcategory)
-                xsubcate = args.selected_subcategory(i,j);
-                regress_name = [regress_name {subcategory_name{xcate}{xsubcate}}];
-            end
-        end %#ok<*AGROW>
-    end
-    rest_class = length(regress_name) + 1;
-    
+    for xcate = 1:n_category
+        regress_name = [regress_name subcategory_name{xcate}];
+    end %#ok<*AGROW>    
 elseif strcmp(args.level, 'item')
-    for xcate = args.selected_category%n_category
+    for xcate = 1:n_category
         for xsubcate = 1:n_subcategory 
             regress_name = [regress_name item_name{xcate}{xsubcate}]; 
         end
@@ -85,45 +71,9 @@ if ~strcmp(args.level, 'item')
         end
     end
     
-    %% =============== REST CATEGORY
-    if strcmp(args.rest, 'rest')
-        xregs = rest_class;
-        regs.regressor_name{xregs} = 'rest';
-        regs.regressors(xregs,:)   = zeros(1, n_cat_volumes);
-        
-        sum_regressors = sum(regs.regressors);
-        regs.regressors(xregs, sum_regressors==0) = 1;
-        regs.regressors_index(sum_regressors==0)  = xregs;
-        
-        %% =============== PICK CLASSES=0
-        %***************** set 0 for excluded category in rest regressor
-        if args.class_selecting
-            classes   = 1:n_category;
-            xcate_cut = classes(~ismember(classes, args.selected_category));
-            
-            xregs = rest_class;
-            
-            for it_cate = xcate_cut
-                xunit   = getDATA(regs.matrix', regs.header, {'category'}, {it_cate});
-                
-                regs.regressors(xregs, xunit) = 0;
-                regs.regressors_index(xunit)  = 0;
-            end
-        end
-    end
-    
     %% =============== SAVE REGRESSOR
     xname = sprintf('%s_%dtr_%s_%s.mat', ...
             args.train_regress_type, args.shift_TRs, args.level, args.rest);
-        
-    if args.class_selecting
-        xname = sprintf('cate%s_%s', sprintf('%d',args.selected_category), xname);
-    end
-    
-    if args.subclass_selecting
-        xname = sprintf('subcate%s_%s', sprintf('%d',args.selected_subcategory), xname);
-    end
-    
     fname = fullfile(dirs.mvpa.regressor{xph}, ...
         sprintf('localizer_classification_regressor_%s', xname));
     

@@ -28,15 +28,9 @@ for xcond = 1:n_target
     
     xregs.timecourse(xunit) = xcond;
     
-    if args.reset_6tr{xph}
-        xunit = find(getDATA(xindex.matrix', xindex.header, ...
-            {'condition','presentation','spike'}, ...
-            {xcond, 2, 0}));
-    else
-        xunit = find(getDATA(xindex.matrix', xindex.header, ...
-            {'condition','manipulation','spike'}, ...
-            {xcond, 1, 0}));
-    end
+    xunit = find(getDATA(xindex.matrix', xindex.header, ...
+        {'condition','manipulation','spike'}, ...
+        {xcond, 1, 0}));
     
     xregs.operation_sh(xunit + args.shift_TRs) = xcond;
 end
@@ -49,9 +43,7 @@ xcond_name   = xparam.conds_names;
 n_condition  = length(xcond_name);
 n_runs       = xparam.n_runs;
 n_trials     = xparam.n_trials;
-
 n_trs        = args.tc_tr;
-dur_sync     = args.dur_sync;
 
 %*************** output basename
 base_name    = args.analysis_basename;
@@ -209,10 +201,6 @@ if check_perf% check mvpa performance
             for xtr = 1:n_trs
                 for zz = 1:2%1_raw, 2_zscored
                     decode.timecourse.operation{xcond}.decoded_operation{xoper}.evidence{zz}.tr{xtr} = [];
-                    
-                    if xtr <= dur_sync
-                        decode.timecourse.sync.operation{xcond}.decoded_operation{xoper}.evidence{zz}.tr{xtr} = [];
-                    end
                 end
             end
         end
@@ -235,16 +223,6 @@ if check_perf% check mvpa performance
                                 decode.timecourse.operation{xcond}.decoded_operation{xoper}.evidence{zz}.tr{xtr} = ...
                                     horzcat(decode.timecourse.operation{xcond}.decoded_operation{xoper}.evidence{zz}.tr{xtr}, ...
                                     out_acts{zz}(xoper, xunit_tc(xtr)));
-                                
-                                %*************** sync trs
-                                if xtr > length(xunit)
-                                    it_tr = xtr - length(xunit);
-                                    if it_tr <= dur_sync
-                                        decode.timecourse.sync.operation{xcond}.decoded_operation{xoper}.evidence{zz}.tr{it_tr} = ...
-                                            horzcat(decode.timecourse.sync.operation{xcond}.decoded_operation{xoper}.evidence{zz}.tr{it_tr}, ...
-                                            out_acts{zz}(xoper, xunit_tc(xtr)));
-                                    end
-                                end
                             end
                         end
                     end

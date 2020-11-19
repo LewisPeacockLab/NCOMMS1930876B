@@ -166,8 +166,4 @@ else
     fprintf('...study_parameters_%s.mat was loaded\n', args.subject_id);
 end
 
-%% =========== save regressor table
-% xtable = array2table(trimed_matrix', 'VariableNames', xheader);
-% writetable(xtable, fullfile(dirs.param, sprintf('study_design_matrix_%s.csv', args.subject_id)));
-
 end

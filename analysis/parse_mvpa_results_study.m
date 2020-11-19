@@ -41,7 +41,6 @@ dur_stim           = xparam.dur_stim;
 dur_oper           = xparam.dur_manipulation;
 dur_fix            = xparam.dur_iti;
 n_trs              = args.tc_tr;
-dur_sync           = args.dur_sync;%next trial 
 
 %*************** setup category index
 subcate_index      = 1:n_subcategory;
@@ -102,30 +101,9 @@ for xrun = 1:n_runs
     
     if strcmp(args.level, 'category')
         tclass = tcate;
-        xrest  = max(tclass) + 1;
-        
-        if strcmp(args.rest, 'rest'), tclass(tclass == 0) = xrest; end
-        
     elseif strcmp(args.level, 'subcategory')
         tclass = tsubcate + ((tcate-1) * n_subcategory);
-        xrest  = max(tclass) + 1;
-        
-        if strcmp(args.rest, 'rest'), tclass(tclass < 0) = xrest;
-        else tclass(tclass < 0) = 0; end
-    end
-    
-    %*************** reset desired category for only selected 
-    if args.class_selecting
-        tmp_class = tunit * 0;
-        
-        for xclass_num = 1:length(xselected_class)
-            xclass = xselected_class(xclass_num);
-            tmp_class(tclass==xclass) = xclass_num;
-        end
-        
-        if strcmp(args.rest, 'rest'), tmp_class(tclass==xrest) = rest_class; end
-        
-        tclass = tmp_class;
+        tclass(tclass < 0) = 0;
     end
     
     out_desireds    = horzcat(out_desireds, tclass);
@@ -139,7 +117,7 @@ xtable = array2table(decode.matrix', 'VariableNames', decode.header);
 writetable(xtable, fullfile(dirs.param, sprintf('study_%s_volume_matrix_reset_%s.csv', args.level, args.subject_id)));
 
 %% ============= SETUP STRUCTURE
-% xdesired: 1_9 subcategory, 10: rest
+% xdesired: 1_9 subcategory
 % decode.classifier.guessed{xdesired}(xguess)
 % decode.classifier.evidence{xdesired}(xguess)
 % decode.classifier.accuracy(xdesired)
@@ -151,7 +129,7 @@ for xdesired = 1:n_classes
 end
 
 %% ============= CLASSIFICATION RESULTS
-% xdesired: 1_9 subcategory, 10: rest
+% xdesired: 1_9 subcategory
 % decode.classifier.guessed{xdesired}(xguess)
 % decode.classifier.evidence{xdesired}(xguess)
 % decode.classifier.accuracy(xdesired)
@@ -297,10 +275,6 @@ for xcond = 1:n_condition
     for xtr = 1:n_trs
         for xtarg = 1:n_targ
             decode.timecourse.condition{xcond}.target{xtarg}.evidence{xtr} = [];
-            
-            if xtr <= dur_sync
-                decode.timecourse.sync.condition{xcond}.target{xtarg}.evidence{xtr} = [];
-            end
         end
         
         for xcate = 1:n_classes
@@ -308,190 +282,8 @@ for xcond = 1:n_condition
                 
                 decode.cate_timecourse.condition{xcond}.category{xcate}.target{xx}.evidence{xtr} = [];
                 
-                if xtr <= dur_sync
-                    decode.cate_timecourse.sync.condition{xcond}.category{xcate}.target{xx}.evidence{xtr} = [];
-                end
-                
                 for xnewcate = 1:n_classes
-                    
-                    decode.cate_timecourse.condition{xcond}.category{xcate}.newcategory{xnewcate}.target{xx}.evidence{xtr} = [];
-                    
-                    if xtr <= dur_sync
-                        decode.cate_timecourse.sync.condition{xcond}.category{xcate}.newcategory{xnewcate}.target{xx}.evidence{xtr} = [];
-                    end
-                end
-            end
-        end
-    end
-end
-
-%% ============= CONCAT EVIDENCE: PER CATEGORY timecourse
-%*************** showing the differences of targets for each category.
-%*************** category/trial based
-% decode.concat_timecourse.condition{xcond}.targ{xcate}(xheader,tr)
-xheader = {'it','targ','nontarg1','nontarg2'};
-
-if strcmp(args.level,'category')
-    for xcond = 1:n_condition
-        %*************** collecting evidence per category
-        for xcate = 1:n_classes  
-            clear xevidence i
-            
-            if xcond~=2, xevidence = []; i = 1;
-            else for j=1:3, xevidence{j} = []; i{j} = 1; end
-            end
-                        
-            for xrun = 1:xindex.param.n_runs
-                xtarg_trial = unique(getDATA(decode.matrix', decode.header, ...
-                    {'run','condition','category'}, {xrun, xcond, xcate},...
-                    findCol(decode.header, {'trial'})))';
-                
-                for xtrial = xtarg_trial
-                    %*************** unit
-                    xunit_trial = find(getDATA(decode.matrix', decode.header,...
-                        {'run','trial'}, {xrun, xtrial}));
-                    xunit_stim  = xunit_trial(1:dur_stim);
-                    xunit_manip = xunit_trial(~ismember(xunit_trial, xunit_stim));
-                    
-                    %*************** new target
-                    if xcond==2
-                        xnew_cate = unique(decode.matrix(findCol(decode.header,{'new_category'}), xunit_manip));
-                    end
-                    
-                    %*************** nontarg
-                    if xcond==2
-                        xnontarg = class_index(~ismember(class_index, [xcate, xnew_cate]));
-                    else
-                        xnontarg = class_index(~ismember(class_index, xcate));
-                    end
-                    xnontarg = sort(xnontarg);
-                    
-                    %*************** evidence
-                    on_unit     = xunit_stim(1);% - args.shift_TRs;
-                    off_unit    = on_unit + n_trs - 1;% xunit_manip(1) + dur_manip + hrf_trs - 1;% - args.shift_TRs;
-                    
-                    xtc_unit    = on_unit:off_unit;
-                    xtc_spike   = ~(decode.matrix(findCol(decode.header, {'spike'}), xtc_unit));
-                    
-                    act_matrix = out_acts(:, xtc_unit(xtc_spike));
-                    
-                    %*************** targ
-                    t_evidence = [];
-                    t_evidence(findCol(xheader,{'targ'}),:) = act_matrix(xcate, :);
-                    
-                    if xcond==2
-                        t_evidence(findCol(xheader,{'nontarg1'}),:) = act_matrix(xnew_cate, :);
-                        t_evidence(findCol(xheader,{'nontarg2'}),:) = act_matrix(xnontarg, :);
-                        t_evidence(findCol(xheader,{'it'}),:) = i{xnew_cate}; i{xnew_cate} = i{xnew_cate} + 1;
-                    else
-                        t_evidence(findCol(xheader,{'nontarg1'}),:) = act_matrix(xnontarg(1), :);
-                        t_evidence(findCol(xheader,{'nontarg2'}),:) = act_matrix(xnontarg(2), :);
-                        t_evidence(findCol(xheader,{'it'}),:) = i; i = i + 1;
-                    end
-                    
-                    if xcond==2
-                        xevidence{xnew_cate} = horzcat(xevidence{xnew_cate}, t_evidence);
-                    else
-                        xevidence = horzcat(xevidence, t_evidence);
-                    end
-                end
-            end
-            
-            %*************** target: presented {1}
-            if xcond~=2
-                decode.concat_timecourse.condition{xcond}.targ{xcate} = xevidence;
-            else
-                for xnew_cate = class_index(~ismember(class_index, xcate))
-                    decode.concat_timecourse.condition{xcond}.targ{xcate}.newtarg{xnew_cate} = xevidence{xnew_cate};
-                end
-            end
-        end
-    end
-end
-
-%% ============= COLLECTING EVIDENCE: PER CATEGORY timecourse
-%*************** category/trial based
-% decode.cate_timecourse.condition{xcond}.category{xcate}.target{xx}.evidence{xtr}
-% xtarg: 1_target, 2_nontarg1/newtarg, 3_nontarg2/nontarg
-
-if strcmp(args.level,'category')
-    for xrun = 1:n_runs
-        for xtrial = 1:n_trials(xrun)
-            xunit_trial = find(getDATA(decode.matrix', decode.header,...
-                {'run','trial'}, {xrun, xtrial}));
-            xunit_stim  = xunit_trial(1:dur_stim);
-            xunit_manip = xunit_trial(~ismember(xunit_trial, xunit_stim));
-            
-            xcond       = unique(decode.matrix(findCol(decode.header,{'condition'}), xunit_trial));
-            xcate       = unique(decode.matrix(findCol(decode.header,{'category'}), xunit_stim));
-            xtarg       = xcate;
-            
-            %*************** new target
-            if xcond==2    
-                xnew_cate = unique(decode.matrix(findCol(decode.header,{'new_category'}), xunit_manip));
-                xnew_targ = xnew_cate;
-            end
-            
-            %*************** mean(nontarg)
-            if xcond==2
-                xnontarg = class_index(~ismember(class_index, [xtarg, xnew_targ]));
-            else
-                xnontarg = class_index(~ismember(class_index, xtarg));
-            end
-            
-            if xcond==2
-                targ_array = [xtarg, xnew_targ, xnontarg];
-            else
-                targ_array = [xtarg, xnontarg];
-            end
-            
-            %********************************
-            %*************** collect evidence
-            on_unit   = xunit_stim(1);% - args.shift_TRs;
-            off_unit  = on_unit + n_trs - 1;%xunit_manip(1) + dur_manip + hrf_trs - 1;% - args.shift_TRs;
-            
-            xtc_unit  = on_unit:off_unit;
-            xtc_spike = ~(decode.matrix(findCol(decode.header,{'spike'}), xtc_unit));
-            
-            for xtr = 1:length(xtc_unit)
-                if xtc_spike(xtr)~=0
-                    act_matrix = out_acts(:, xtc_unit(xtr));
-                    
-                    %*************** target/new target/nontarg
-                    if xcond~=2
-                        for xx = targ_array
-                            decode.cate_timecourse.condition{xcond}.category{xcate}.target{xx}.evidence{xtr} = ...
-                                horzcat(decode.cate_timecourse.condition{xcond}.category{xcate}.target{xx}.evidence{xtr}, ...
-                                act_matrix(targ_array(xx)));
-                            
-                            %*************** sync trs
-                            if xtr > length(xunit_trial)
-                                it_tr = xtr - length(xunit_trial);
-                                if it_tr <= dur_sync
-                                    decode.cate_timecourse.sync.condition{xcond}.category{xcate}.target{xx}.evidence{it_tr} = ...
-                                        horzcat(decode.cate_timecourse.sync.condition{xcond}.category{xcate}.target{xx}.evidence{it_tr}, ...
-                                        act_matrix(targ_array(xx)));
-                                end
-                            end
-                            
-                        end
-                    else
-                        for xx = targ_array
-                            decode.cate_timecourse.condition{xcond}.category{xcate}.newcategory{xnew_targ}.target{xx}.evidence{xtr} = ...
-                                horzcat(decode.cate_timecourse.condition{xcond}.category{xcate}.newcategory{xnew_targ}.target{xx}.evidence{xtr}, ...
-                                act_matrix(targ_array(xx)));
-                            
-                            %*************** sync trs
-                            if xtr > length(xunit_trial)
-                                it_tr = xtr - length(xunit_trial);
-                                if it_tr <= dur_sync
-                                    decode.cate_timecourse.sync.condition{xcond}.category{xcate}.newcategory{xnew_targ}.target{xx}.evidence{it_tr} = ...
-                                        horzcat(decode.cate_timecourse.sync.condition{xcond}.category{xcate}.newcategory{xnew_targ}.target{xx}.evidence{it_tr}, ...
-                                        act_matrix(targ_array(xx))); 
-                                end
-                            end
-                        end
-                    end
+                    decode.cate_timecourse.condition{xcond}.category{xcate}.newcategory{xnewcate}.target{xx}.evidence{xtr} = [];\
                 end
             end
         end
@@ -626,46 +418,7 @@ if strcmp(args.level, 'subcategory')
                         horzcat(decode.timecourse.condition{xcond}.target{n_targ}.evidence{xtr},...
                         mean(act_matrix(xnontarg)));
                     
-                    %%%%%%%%%%%%%%%%%%%%%%%%%
-                    %*************** sync trs
-                    if xtr > length(xunit_trial)
-                        it_tr = xtr - length(xunit_trial);
-                        if it_tr <= dur_sync                            
-                            %*************** subtarget: presented {1}
-                            decode.timecourse.sync.condition{xcond}.target{1}.evidence{it_tr} = ...
-                                horzcat(decode.timecourse.sync.condition{xcond}.target{1}.evidence{it_tr},...
-                                act_matrix(xsubtarg));
-                            
-                            %*************** nonsubtarget {2}
-                            decode.timecourse.sync.condition{xcond}.target{2}.evidence{it_tr} = ...
-                                horzcat(decode.timecourse.sync.condition{xcond}.target{2}.evidence{it_tr},...
-                                mean(act_matrix(xnonsubtarg)));
-                            
-                            %*************** new subtarget {3}
-                            if (xcond==2) || (xcond==3)
-                                if sum(ismember(xselected_class, xnew_subtarg))
-                                    decode.timecourse.sync.condition{xcond}.target{3}.evidence{it_tr} = ...
-                                        horzcat(decode.timecourse.sync.condition{xcond}.target{3}.evidence{it_tr},...
-                                        act_matrix(xnew_subtarg));
-                                end
-                            end
-                            
-                            %*************** new nonsubtarget {4}
-                            if xcond==2
-                                decode.timecourse.sync.condition{xcond}.target{4}.evidence{it_tr} = ...
-                                    horzcat(decode.timecourse.sync.condition{xcond}.target{4}.evidence{it_tr},...
-                                    mean(act_matrix(xnew_nonsubtarg)));
-                            end
-                            
-                            %*************** nontarg {n_targ}
-                            decode.timecourse.sync.condition{xcond}.target{n_targ}.evidence{it_tr} = ...
-                                horzcat(decode.timecourse.sync.condition{xcond}.target{n_targ}.evidence{it_tr},...
-                                mean(act_matrix(xnontarg)));
-                        end
-                    end
-                    
-                    %%%%%%%%%%%%%%%%%%%%%%%%%
-                    %*************** binded trs
+                    %*************** bined trs
                     if xtr <= length(xunit_trial)
                         xbin = 1; it_tr = xtr;
                     else
@@ -774,33 +527,7 @@ elseif strcmp(args.level, 'category')
                         mean(act_matrix(xnontarg)));
                     
                     %%%%%%%%%%%%%%%%%%%%%%%%%
-                    %*************** sync trs
-                    if xtr > length(xunit_trial)
-                        it_tr = xtr - length(xunit_trial);
-                        if it_tr <= dur_sync
-                            
-                            %*************** target: presented {1}
-                            decode.timecourse.sync.condition{xcond}.target{1}.evidence{it_tr} = ...
-                                horzcat(decode.timecourse.sync.condition{xcond}.target{1}.evidence{it_tr},...
-                                act_matrix(xtarg));
-                            
-                            %*************** new target {2}
-                            if xcond==2
-                                decode.timecourse.sync.condition{xcond}.target{2}.evidence{it_tr} = ...
-                                    horzcat(decode.timecourse.sync.condition{xcond}.target{2}.evidence{it_tr},...
-                                    act_matrix(xnew_targ));
-                            end
-                            
-                            %*************** nontarg {n_targ}
-                            decode.timecourse.sync.condition{xcond}.target{n_targ}.evidence{it_tr} = ...
-                                horzcat(decode.timecourse.sync.condition{xcond}.target{n_targ}.evidence{it_tr},...
-                                mean(act_matrix(xnontarg)));
-                            
-                        end
-                    end
-                    
-                    %%%%%%%%%%%%%%%%%%%%%%%%%
-                    %*************** binded trs
+                    %*************** bined trs
                     if xtr <= length(xunit_trial)
                         xbin = 1; it_tr = xtr;
                     else

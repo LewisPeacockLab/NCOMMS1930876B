@@ -123,19 +123,15 @@ if reset
     
     %% =============== TRIM MATRIX
     %***************** trim TRs: 10TRs are trimed
-    if args.trim_trs
-        xunit = [];
-        for xrun = selected_runs
-            tunit = find(getDATA(xmatrix', xheader, {'it_run'}, {xrun}));
-            xunit = vertcat(xunit, tunit((args.xtrim + 1):end));
-        end
-        
-        %***************** reset volumes
-        trimed_matrix = xmatrix(:, xunit);
-        trimed_matrix(findCol(xheader, {'volume'}), :) = 1:(length(xcat_volume)-(args.xtrim * n_runs));
-    else
-        trimed_matrix = xmatrix;
+    xunit = [];
+    for xrun = selected_runs
+        tunit = find(getDATA(xmatrix', xheader, {'it_run'}, {xrun}));
+        xunit = vertcat(xunit, tunit((args.trim_trs + 1):end));
     end
+    
+    %***************** reset volumes
+    trimed_matrix = xmatrix(:, xunit);
+    trimed_matrix(findCol(xheader, {'volume'}), :) = 1:(length(xcat_volume)-(args.xtrim * n_runs));
     
     %% =============== SAVE
     index.header        = xheader;
@@ -151,9 +147,5 @@ else
     index = xx.index;
     fprintf('...localizer_parameters_%s.mat was loaded\n', args.subject_id);
 end
-
-%% =============== save regressor table
-% xtable = array2table(trimed_matrix', 'VariableNames', xheader);
-% writetable(xtable, fullfile(dirs.param, sprintf('localizer_design_matrix_%s.csv', args.subject_id)));
 
 end

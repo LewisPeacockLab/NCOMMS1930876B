@@ -17,17 +17,6 @@ function[mvpaout] = parse_mvpa_results_localizer(args, ph, dirs)
     it_categories      = 1:n_category;
     it_subcategories   = 1:n_subcategory;
     
-    if strcmp(args.level, 'subcategory') && args.class_selecting
-        it_categories = args.selected_category;
-       
-        if args.subclass_selecting%only when selected category is one
-            it_subcategories = args.selected_subcategory;
-        end
-        
-    elseif strcmp(args.level, 'category') && args.class_selecting
-        it_categories = args.selected_category;
-    end
-    
     %*************** output basename
     base_name = args.analysis_basename;
 

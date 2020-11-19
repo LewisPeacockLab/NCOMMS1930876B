@@ -13,8 +13,6 @@ function[subj, nm] = mvpa_ph01_patterns_gz(args, subj, nm, dirs)
         mask_dir  = dirs.mvpa.selected_mask{xph}; 
     else
         mask_dir = dirs.mask; 
-%         if args.wholebrain, mask_dir = dirs.epi_mid;
-%         else                mask_dir = dirs.mask; end
     end
     
     %*************** MASK
@@ -34,57 +32,32 @@ function[subj, nm] = mvpa_ph01_patterns_gz(args, subj, nm, dirs)
     nm.pats{xph} = sprintf('%s_patterns', args.phase_name{xph});
 
     %*************** shift epi
-    if strcmp(args.regress_type, 'shift')
-        for xrun = 1:length(dirs.runs{xph})
-            args.epi_names{xph}{xrun} = ...
-                fullfile(dirs.runs{xph}{xrun}, sprintf('%s.%s.gz', args.epi_name, args.epiext));
-        end
-                
-        fprintf('\n... loading epi patterns: n_runs: %d\n', length(dirs.runs{xph}));
-        
-        %*************** read pattern from operation
-        if args.read_mat{xph}
-            
-            xwhole_mask = find(args.whole_pattern.masks{1}.mat);
-            xmask       = find(subj.masks{2}.mat);
-            new_mat     = ismember(xwhole_mask, xmask);
-            xpattern    = args.whole_pattern.patterns{1}.mat(new_mat, :);
-            
-            subj = initset_object(subj,'pattern', nm.pats{xph}, xpattern, 'masked_by', nm.mask{2});
-            
-            subj.patterns{4}.header = args.whole_pattern.patterns{1}.header;
-            
-        else
-            subj = load_spm_pattern_gz(subj, nm.pats{xph}, nm.mask{xph}, args.epi_names{xph});
-        end
-         
-    elseif strcmp(args.regress_type, 'beta')
-        args.epi_names = fullfile(dirs.beta.home, ...
-                         sprintf('LSS_beta_localizer_%s.nii.gz', args.subject_id));
-        
-        fprintf('... loading beta patterns\n');
-        subj = load_spm_pattern_gz(subj, nm.pats{xph}, nm.mask{xph}, args.epi_names);
+    for xrun = 1:length(dirs.runs{xph})
+        args.epi_names{xph}{xrun} = ...
+            fullfile(dirs.runs{xph}{xrun}, sprintf('%s.%s.gz', args.epi_name, args.epiext));
     end
+    
+    fprintf('\n... loading epi patterns: n_runs: %d\n', length(dirs.runs{xph}));
+    
+    %*************** read pattern from operation
+    subj = load_spm_pattern_gz(subj, nm.pats{xph}, nm.mask{xph}, args.epi_names{xph});
     
     %% ============= RESET PATTERNS
     %*************** trim the first 10TRs of each run if untrimed 
-    if (~args.trim_trs) && (~args.read_mat{xph})% 0_non_trimmed, 1_trimmed
-        
-        if xph == 2, xcell = 4; else xcell = 1; end
-        
-        %*************** reset patterns
-        fprintf('\n  ... reset patterns: trim the first %sTRs: from subj.patterns{%d}.mat\n', ...
-            num2str(args.xtrim), xcell);
-
-        xmatrix = args.regs{xph}.matrix;%6990
-        xheader = args.regs{xph}.header;
-        xunit   = xmatrix(findCol(xheader, {'it_volume'}), :);
-        
-        selected_pattern = subj.patterns{xcell}.mat(:, xunit);
-        
-        subj    = set_mat(subj, 'pattern', subj.patterns{xcell}.name, selected_pattern);
-        summarize(subj, 'objtype', 'pattern');
-    end
+    if xph == 2, xcell = 4; else xcell = 1; end
+    
+    %*************** reset patterns
+    fprintf('\n  ... reset patterns: trim the first %sTRs: from subj.patterns{%d}.mat\n', ...
+        num2str(args.trim_trs), xcell);
+    
+    xmatrix = args.regs{xph}.matrix;%6990
+    xheader = args.regs{xph}.header;
+    xunit   = xmatrix(findCol(xheader, {'it_volume'}), :);
+    
+    selected_pattern = subj.patterns{xcell}.mat(:, xunit);
+    
+    subj    = set_mat(subj, 'pattern', subj.patterns{xcell}.name, selected_pattern);
+    summarize(subj, 'objtype', 'pattern');
     
     %% ============= ZSCORING: subj.patterns{2}
     %*************** zsoring each voxel, include 'rest' in the zscoring
