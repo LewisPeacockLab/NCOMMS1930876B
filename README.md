@@ -2,6 +2,6 @@
 
 shared codes for NCOMMS-19-30876B
 
-## Running analysis
+## analysis pipeline
 
-Runing 
+pipeline.m includes all steps of analyses reported
