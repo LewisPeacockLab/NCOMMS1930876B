@@ -1,4 +1,4 @@
-function[] = clearmem_operation_importance_map_subj(args, dirs)
+function[] = operation_importance_map_subj(args, dirs)
 
 % individual-level (1st level)
 %   1. Negative and Positive maps are calculated separately

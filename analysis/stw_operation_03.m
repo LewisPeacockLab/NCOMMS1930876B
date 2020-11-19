@@ -1,4 +1,4 @@
-function[] = clearmem_stw_operation_03(args, dirs)
+function[] = stw_operation_03(args, dirs)
 % step 3: RSA timecourse: test on study: 1st + 2nd level
 
 %% ============= UNPACK ARGS.

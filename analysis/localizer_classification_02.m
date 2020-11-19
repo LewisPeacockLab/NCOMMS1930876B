@@ -1,4 +1,4 @@
-function[] = clearmem_localizer_classification_02(args, dirs)
+function[] = localizer_classification_02(args, dirs)
 % step 2: classification (with all penalties if args.penalty_check = 1)
 %         if args.penalty_check = 0, load maximum penalty
 

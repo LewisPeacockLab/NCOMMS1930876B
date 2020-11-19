@@ -1,4 +1,4 @@
-function[] = clearmem_mvpa_decode_02(args, dirs)
+function[] = mvpa_decode_02(args, dirs)
 % step 2: load penalty from localizer classifier + classification
 % train localizer + test study classification
 % classification based on localizer penalty

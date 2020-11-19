@@ -1,4 +1,4 @@
-function[] = clearmem_operation_importance_map(args, dirs)
+function[] = operation_importance_map(args, dirs)
 % step 6: importance map 1st + 2nd
 % group-level
 %   1. average all z-scored individual maps into group map

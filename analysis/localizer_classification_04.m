@@ -1,4 +1,4 @@
-function[] = clearmem_localizer_classification_04(args, dirs)
+function[] = localizer_classification_04(args, dirs)
 % step 4: AUC 2nd
 
 %% ============= UNPACK ARGS.

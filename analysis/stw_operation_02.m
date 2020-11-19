@@ -1,4 +1,4 @@
-function[] = clearmem_stw_operation_02(args, dirs)
+function[] = stw_operation_02(args, dirs)
 % step 2: parse the mvpa outcome
 
 %% ============= UNPACK ARGS

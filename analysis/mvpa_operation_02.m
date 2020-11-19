@@ -1,4 +1,4 @@
-function[] = clearmem_mvpa_operation_02(args, dirs)
+function[] = mvpa_operation_02(args, dirs)
 % step 2: classification (penalty: 50)
 
 %% ============= UNPACK ARGS.

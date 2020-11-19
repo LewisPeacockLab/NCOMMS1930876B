@@ -1,4 +1,4 @@
-function[] = clearmem_rsa_decode_02_item(args, dirs)
+function[] = rsa_decode_02_item(args, dirs)
 
 %% ============= SETUP DIRECTORY
 spm_mask_dir    = fullfile(dirs.rsa.roi.home, 'spm');

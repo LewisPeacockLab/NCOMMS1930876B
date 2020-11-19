@@ -1,4 +1,4 @@
-function[] = clearmem_mvpa_operation_03(args, dirs)
+function[] = mvpa_operation_03(args, dirs)
 % step 3: parse the mvpa outcome/ AUC 1st level
 
 %% ============= UNPACK ARGS.

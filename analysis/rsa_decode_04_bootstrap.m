@@ -1,4 +1,4 @@
-function[] = clearmem_rsa_decode_04_bootstrap(args, dirs)
+function[] = rsa_decode_04_bootstrap(args, dirs)
 %*************** bootstrapping
 %% ============= SETUP DIRECTORY
 xph             = 2;

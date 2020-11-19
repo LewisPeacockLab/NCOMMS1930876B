@@ -1,4 +1,4 @@
-function[] = clearmem_mvpa_decode_01(args, dirs)
+function[] = mvpa_decode_01(args, dirs)
 %*************** patterns + regressor + feature selection
 % train localizer + test study setup
 % step 1: train: EPI patterns + regressors + feature selection

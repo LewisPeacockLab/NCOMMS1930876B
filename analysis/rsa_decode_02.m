@@ -1,4 +1,4 @@
-function[] = clearmem_rsa_decode_02(args, dirs)
+function[] = rsa_decode_02(args, dirs)
 %*************** create template by averaging the extracted pattern
 %*************** category level
 

@@ -1,4 +1,4 @@
-function[] = clearmem_mvpa_operation_01(args, dirs)
+function[] = mvpa_operation_01(args, dirs)
 % step 1: read EPI patterns + regressors/selectors + feature selection
 %         decoding setup: decode all timepoints for the testing run
 

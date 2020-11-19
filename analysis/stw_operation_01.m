@@ -1,4 +1,4 @@
-function[] = clearmem_stw_operation_01(args, dirs)
+function[] = stw_operation_01(args, dirs)
 % step 1: load EPI patterns + regressors/selectors
 %         + feature selection + classification (penalty: 0.5)
 

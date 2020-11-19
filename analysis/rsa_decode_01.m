@@ -1,4 +1,4 @@
-function[] = clearmem_rsa_decode_01(args, dirs)
+function[] = rsa_decode_01(args, dirs)
 % step 1. ROI extraction (GLM): localizer / 128 hf applied
 
 %% ============= UNPACK ARGS

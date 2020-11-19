@@ -1,4 +1,4 @@
-function[] = clearmem_mvpa_decode_04(args, dirs)
+function[] = mvpa_decode_04(args, dirs)
 % step 4: 2nd level analysis + timecourse
 
 %% ============= UNPACK ARGS.

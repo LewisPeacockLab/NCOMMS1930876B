@@ -1,4 +1,4 @@
-function[] = clearmem_rsa_decode_03(args, dirs)
+function[] = rsa_decode_03(args, dirs)
 %*************** RSA timecourse: test on study
 
 %% ============= SETUP DIRECTORY

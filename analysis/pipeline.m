@@ -1,4 +1,4 @@
-function[] = clearmem_pipeline(xstep, xlevel, xmask)
+function[] = pipeline(xstep, xlevel, xmask)
 
 %**********************************************************
     %%%%% xstep:

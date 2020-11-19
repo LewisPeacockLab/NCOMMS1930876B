@@ -1,4 +1,4 @@
-function[] = clearmem_localizer_classification_03(args, dirs)
+function[] = localizer_classification_03(args, dirs)
 % step 3: parse the mvpa outcome 
 
 %% ============= UNPACK ARGS.

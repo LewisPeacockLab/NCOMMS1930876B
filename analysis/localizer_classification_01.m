@@ -1,4 +1,4 @@
-function[] = clearmem_localizer_classification_01(args, dirs)
+function[] = localizer_classification_01(args, dirs)
 % step 1: read EPI patterns + regressors/selectors + feature selection
 
 %% ============= UNPACK ARGS.
