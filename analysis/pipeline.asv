@@ -468,7 +468,7 @@ if sum(operation_mvpa_decode)
             %*************** classification
             if operation_mvpa_decode(1), mvpa_operation_01(args, dirs); end
             if operation_mvpa_decode(2), mvpa_operation_02(args, dirs); end
-            if operation_mvpa_decode(3), mvpa_operation_03(args, dirs); end
+            if operation_mvpa_decode(3), clearmem_mvpa_operation_03(args, dirs); end
         end
     end
     
@@ -499,7 +499,7 @@ if sum(operation_mvpa_decode)
             if ~isdir(dirs.mvpa.group.mvpa_result{xphase}), mkdir(dirs.mvpa.group.mvpa_result{xphase}); end
             
             %*************** group analysis
-            mvpa_operation_04(args, dirs);
+            clearmem_mvpa_operation_04(args, dirs);
         end
         
         %********************************
@@ -514,7 +514,7 @@ if sum(operation_mvpa_decode)
             if ~isdir(dirs.mvpa.group.auc_baseline{xphase}), mkdir(dirs.mvpa.group.auc_baseline{xphase}); end
             
             %*************** group analysis
-            mvpa_operation_05(args, dirs);
+            clearmem_mvpa_operation_05(args, dirs);
         end
     
         %********************************
@@ -534,7 +534,7 @@ if sum(operation_mvpa_decode)
                     if ~isdir(dirs.mvpa.imp_map{xphase}), mkdir(dirs.mvpa.imp_map{xphase}); end
                     
                     %*************** 1st-level importance map analysis
-                    operation_importance_map_subj(args, dirs);
+                    clearmem_operation_importance_map_subj(args, dirs);
                 end
             end
             
@@ -542,7 +542,7 @@ if sum(operation_mvpa_decode)
             if ~isdir(dirs.mvpa.group.imp_map{xphase}), mkdir(dirs.mvpa.group.imp_map{xphase}); end
             
             %*************** importance map analysis
-            operation_importance_map(args, dirs);
+            clearmem_operation_importance_map(args, dirs);
         end
     end
 end
@@ -586,7 +586,7 @@ if sum(rsa_decode)
             args.regs{1}  = create_spm_regressor_localizer(args, dirs);
             
             %*************** classification
-            rsa_decode_01(args, dirs);
+            clearmem_rsa_decode_01(args, dirs);
             
         end
     elseif rsa_decode(2)
@@ -619,9 +619,9 @@ if sum(rsa_decode)
             
             %*************** rsa
             if ~strcmp(args.level, 'item')
-                rsa_decode_02(args, dirs);
+                clearmem_rsa_decode_02(args, dirs);
             else
-                rsa_decode_02_item(args, dirs);
+                clearmem_rsa_decode_02_item(args, dirs);
             end
             
         end
@@ -657,13 +657,13 @@ if sum(rsa_decode)
         %*************** group analysis
         if rsa_decode(3)
             if ~strcmp(args.level, 'item')
-                rsa_decode_03(args, dirs);
+                clearmem_rsa_decode_03(args, dirs);
             else
-                rsa_decode_03_item(args, dirs);
+                clearmem_rsa_decode_03_item(args, dirs);
             end
             
         elseif rsa_decode(4) && (strcmp(args.level, 'item'))
-            rsa_decode_04_bootstrap(args, dirs)
+            clearmem_rsa_decode_04_bootstrap(args, dirs)
         end
     end
 end
@@ -679,12 +679,14 @@ if sum(operation_mvpa_stw)
     %================= study arguments
     args.cross_valid        = 1;%1 is default: n-1 cross-validation
     args.cross_decoding     = 0;%1 cross validation + decoding on all testing timepoints (non-shifted)
-    args.regress_type       = 'shift';
     
     %*************** base name
     args.analysis_basename = sprintf('stw_%s_%s_%s_shift%str_%s', ...
         args.phase_name{xphase}, args.mask_name, args.epi_name, ...
         num2str(args.shift_TRs), args.rest);
+    
+    %*************** ANALYSIS PARAMETERS
+    args.regress_type       = args.train_regress_type;
     
     %*************** MVPA_CLASSIFICATION
     if sum(operation_mvpa_stw(1:2))
@@ -707,8 +709,8 @@ if sum(operation_mvpa_stw)
             args.index{xphase} = xindex.index;
             
             %*************** classification
-            if operation_mvpa_stw(1), stw_operation_01(args, dirs); end
-            if operation_mvpa_stw(2), stw_operation_02(args, dirs); end
+            if operation_mvpa_stw(1), clearmem_stw_operation_01(args, dirs); end
+            if operation_mvpa_stw(2), clearmem_stw_operation_02(args, dirs); end
         end
     end
     
@@ -735,6 +737,6 @@ if sum(operation_mvpa_stw)
         if ~isdir(dirs.mvpa.group.mvpa_result{xphase}), mkdir(dirs.mvpa.group.mvpa_result{xphase}); end
         
         %*************** group analysis
-        stw_operation_03(args, dirs);
+        clearmem_stw_operation_03(args, dirs);
     end
 end
